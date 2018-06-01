@@ -20,6 +20,7 @@ import com.google.ar.sceneform.AnchorNode;
 import com.google.ar.sceneform.ArSceneView;
 import com.google.ar.sceneform.Node;
 import com.google.ar.sceneform.math.Quaternion;
+import com.google.ar.sceneform.math.Vector3;
 import com.google.ar.sceneform.rendering.ModelRenderable;
 import com.google.ar.sceneform.ux.ArFragment;
 
@@ -29,6 +30,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
 public class MainActivity extends AppCompatActivity {
     private Context context;
@@ -58,31 +60,27 @@ public class MainActivity extends AppCompatActivity {
         sessionAnchors = new ArrayList<>();
 
         arSceneView.getScene()
-                   .setOnUpdateListener( frameTime -> {
-        Frame frame = arSceneView.getArFrame();
-        if (frame == null) {
-            return;
-        }
-        Collection<AugmentedImage> augmentedImages = frame
-                .getUpdatedTrackables(AugmentedImage.class);
-        if(augmentedImages != null){
-            try {
-                handleReferenceImages(augmentedImages);
-            } catch (ExecutionException | InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
+                .setOnUpdateListener(frameTime -> {
+                    Frame frame = arSceneView.getArFrame();
+                    if (frame == null) {
+                        return;
+                    }
+                    Collection<AugmentedImage> augmentedImages = frame
+                            .getUpdatedTrackables(AugmentedImage.class);
+                    if (augmentedImages != null) {
+                        handleReferenceImages(augmentedImages);
+                    }
 
-    });
+                });
 
     }
 
 
-    private void setUpImageDb(){
+    private void setUpImageDb() {
         try {
             InputStream inputStream = context.getAssets().open("referenceImages.imgdb");
             augmentedImageDatabase = new AugmentedImageDatabase(arSession);
-            augmentedImageDatabase = AugmentedImageDatabase.deserialize(arSession,inputStream);
+            augmentedImageDatabase = AugmentedImageDatabase.deserialize(arSession, inputStream);
             arConfig.setAugmentedImageDatabase(augmentedImageDatabase);
             arSession.configure(arConfig);
         } catch (IOException e) {
@@ -90,43 +88,45 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void handleReferenceImages(Collection<AugmentedImage> augmentedImages) throws ExecutionException, InterruptedException {
-        Collection<Trackable> sessionTrackables = arSession.getAllTrackables(Trackable.class);
+    private void handleReferenceImages(Collection<AugmentedImage> augmentedImages) {
         for (AugmentedImage image : augmentedImages) {
-//            if(!sessionAnchors.isEmpty()){
-//                for(Anchor anchor : sessionAnchors){
-//                    if(anchor.equals(image.createAnchor(image.getCenterPose()))){
-//                        Log.d("IMAGE: ", "Image Anchor was already created ");
-//                        break;
-//                    }
-//                }
-//            }
-
-            if(image.getTrackingState() == TrackingState.TRACKING) {
-
-
-
-
-
+            if (image.getTrackingState() == TrackingState.TRACKING) {
                 Log.d("IMAGE_NAME: ", image.getName());
-//                Anchor imageAnchor = image.createAnchor(image.getCenterPose());
                 Anchor imageAnchor = arSession.createAnchor(image.getCenterPose());
-//                arSession.createAnchor(image.getCenterPose());
                 sessionAnchors.add(imageAnchor);
 
                 AnchorNode anchorNode = new AnchorNode(imageAnchor);
                 anchorNode.setName(image.getName() + "_anchorNode");
                 anchorNode.setParent(arSceneView.getScene());
-                Log.d("ANCHORS: ",String.valueOf(arSession.getAllAnchors().size()));
+                Log.d("ANCHORS: ", String.valueOf(arSession.getAllAnchors().size()));
 
                 ModelRenderable highlightPlane = ARContentCreator.createHighlightImagePlane(image, context);
                 Node highlightPlaneNode = new Node();
                 highlightPlaneNode.setName("highlightPlaneNode");
                 highlightPlaneNode.setRenderable(highlightPlane);
+                highlightPlaneNode.setLocalRotation(new Quaternion(new Vector3(1,0,0), 90));
                 highlightPlaneNode.setParent(anchorNode);
-
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        removeHighlightNode(anchorNode, highlightPlaneNode);
+                    }
+                });
             }
         }
+    }
+
+    private void removeHighlightNode(Node highlightNodeParent, Node highlightNode) {
+        new java.util.Timer().schedule(
+                new java.util.TimerTask() {
+                    @Override
+                    public void run() {
+                        Log.d("TimeOut", "f");
+                        highlightNodeParent.removeChild(highlightNode);
+                    }
+                },
+                1500
+        );
     }
 
 
