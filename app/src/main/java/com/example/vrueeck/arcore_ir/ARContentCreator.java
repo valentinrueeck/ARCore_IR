@@ -12,7 +12,7 @@ import com.google.ar.sceneform.rendering.ShapeFactory;
 
 public class ARContentCreator {
 
-    public static ModelRenderable[] createHighlightImagePlane(AugmentedImage image, Context context) {
+    public static ModelRenderable createHighlightImagePlane(AugmentedImage image, Context context) {
         Vector3 size = new Vector3(image.getExtentX(),image.getExtentZ(), -0.01f);
         Vector3 center = new Vector3(0,0,0);
         final ModelRenderable[] highlightPlane = {null};
@@ -22,7 +22,7 @@ public class ARContentCreator {
                         material -> {
                             highlightPlane[0] = ShapeFactory.makeCube(size, center, material);
                         });
-        return highlightPlane;
+        return highlightPlane[0];
     }
 
 

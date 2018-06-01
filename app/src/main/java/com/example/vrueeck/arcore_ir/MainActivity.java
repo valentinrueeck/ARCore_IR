@@ -119,10 +119,10 @@ public class MainActivity extends AppCompatActivity {
                 anchorNode.setParent(arSceneView.getScene());
                 Log.d("ANCHORS: ",String.valueOf(arSession.getAllAnchors().size()));
 
-                ModelRenderable[] highlightPlane = ARContentCreator.createHighlightImagePlane(image, context);
+                ModelRenderable highlightPlane = ARContentCreator.createHighlightImagePlane(image, context);
                 Node highlightPlaneNode = new Node();
                 highlightPlaneNode.setName("highlightPlaneNode");
-                highlightPlaneNode.setRenderable(highlightPlane[0]);
+                highlightPlaneNode.setRenderable(highlightPlane);
                 highlightPlaneNode.setParent(anchorNode);
 
             }
