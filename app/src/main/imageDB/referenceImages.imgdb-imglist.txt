@@ -1,0 +1,5 @@
+NewYork|/Users/vrueeck/Desktop/virocore-helloworld-ar/app/src/main/assets/NewYork.jpg|0.297
+Ringer|/Users/vrueeck/Desktop/virocore-helloworld-ar/app/src/main/assets/Ringer.jpg|0.297
+Segelboote|/Users/vrueeck/Desktop/virocore-helloworld-ar/app/src/main/assets/Segelboote.jpg|0.297
+VanGogh|/Users/vrueeck/Desktop/virocore-helloworld-ar/app/src/main/assets/VanGogh.jpg|0.297
+Wald|/Users/vrueeck/Desktop/virocore-helloworld-ar/app/src/main/assets/Wald.jpg|0.297
