@@ -17,7 +17,7 @@ public class ARContentCreator {
         Vector3 center = new Vector3(0,0,0);
         final ModelRenderable[] highlightPlane = {null};
 
-        MaterialFactory.makeOpaqueWithColor(context,new Color(1,1,1,0.5f))
+        MaterialFactory.makeTransparentWithColor(context,new Color(1,1,1,0.5f))
                 .thenAccept(
                         material -> {
                             highlightPlane[0] = ShapeFactory.makeCube(size, center, material);
