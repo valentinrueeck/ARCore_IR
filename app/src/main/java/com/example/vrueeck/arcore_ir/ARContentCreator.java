@@ -39,7 +39,8 @@ public class ARContentCreator {
         CompletableFuture<ViewRenderable> future = ViewRenderable.builder().setView(context, R.layout.text_view).build();
         future.thenAccept( view -> {
             textView[0] = view;
-            ((TextView) textView[0].getView()).setText(PaintingDescriptionTextRetriever.retrieveDescriptionText(image.getName()));
+//            ((TextView) textView[0].getView()).setText(PaintingDescriptionTextRetriever.retrieveDescriptionText(image.getName()));
+//            ((TextView)textView[0].getView().findViewById(R.id.textView)).setText(PaintingDescriptionTextRetriever.retrieveDescriptionText(image.getName()));
             Log.d("IMAGE", "ViewRenderable is ready");
         });
 

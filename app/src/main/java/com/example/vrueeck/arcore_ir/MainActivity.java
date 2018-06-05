@@ -4,7 +4,11 @@ import android.content.Context;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.SpannableString;
+import android.text.style.UnderlineSpan;
 import android.util.Log;
+import android.view.MotionEvent;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.google.ar.core.Anchor;
@@ -19,12 +23,14 @@ import com.google.ar.core.exceptions.UnavailableArcoreNotInstalledException;
 import com.google.ar.core.exceptions.UnavailableSdkTooOldException;
 import com.google.ar.sceneform.AnchorNode;
 import com.google.ar.sceneform.ArSceneView;
+import com.google.ar.sceneform.HitTestResult;
 import com.google.ar.sceneform.Node;
 import com.google.ar.sceneform.math.Quaternion;
 import com.google.ar.sceneform.math.Vector3;
 import com.google.ar.sceneform.rendering.ModelRenderable;
 import com.google.ar.sceneform.rendering.ViewRenderable;
 import com.google.ar.sceneform.ux.ArFragment;
+import com.google.ar.sceneform.ux.HandMotionAnimation;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -59,6 +65,7 @@ public class MainActivity extends AppCompatActivity {
         }
         arConfig = new Config(arSession);
         arConfig.setUpdateMode(Config.UpdateMode.LATEST_CAMERA_IMAGE);
+        arConfig.setPlaneFindingMode(Config.PlaneFindingMode.DISABLED);
         setUpImageDb();
         arSceneView.setupSession(arSession);
         lastUpdatedAugmentedImages = new ArrayList<>();
@@ -106,12 +113,8 @@ public class MainActivity extends AppCompatActivity {
                 highlightPlaneNode.setParent(anchorNode);
                 removeHighlightNode(anchorNode, highlightPlaneNode);
 
-                ViewRenderable descriptionText = ARContentCreator.createDescriptionPlane(image,context);
-                Node descriptionPlaneNode = new Node();
-                descriptionPlaneNode.setName("descriptionPlaneNode");
-                descriptionPlaneNode.setRenderable(descriptionText);
-                descriptionPlaneNode.setParent(anchorNode);
-                descriptionPlaneNode.setLocalPosition(new Vector3(0.1f,0f,-0.1f));
+//                addNodeToScene(image, anchorNode);
+                addInfoButton(anchorNode, image);
 
 
                 Collection<Node> nodes = arSceneView.getScene().getChildren();
@@ -158,18 +161,53 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void addNodeToScene(Anchor anchor, AugmentedImage image){
-        AnchorNode anchorNode = new AnchorNode(anchor);
+    private void addNodeToScene(AugmentedImage image, AnchorNode anchorNode){
         CompletableFuture<ViewRenderable> future = ViewRenderable.builder().setView(context, R.layout.text_view).build();
         future.thenAccept( view -> {
-            ((TextView) view.getView()).setText(PaintingDescriptionTextRetriever.retrieveDescriptionText(image.getName()));
+            int height = Math.round(view.getPixelsToMetersRatio() * 0.25f);
+            int width = Math.round(view.getPixelsToMetersRatio() * image.getExtentX());
+
+            TextView headline = view.getView().findViewById(R.id.textViewHeadline);
+            SpannableString headlineText = new SpannableString(image.getName());
+            headlineText.setSpan(new UnderlineSpan(),0, headlineText.length(),0);
+            headline.setText(headlineText);
+
+            TextView descriptionText = view.getView().findViewById(R.id.textView);
+            descriptionText.setText(PaintingDescriptionTextRetriever.retrieveDescriptionText(image.getName()));
+            descriptionText.setWidth(width);
+            descriptionText.setHeight(height);
+
             Node descriptionPlaneNode = new Node();
             descriptionPlaneNode.setName("descriptionPlaneNode");
             descriptionPlaneNode.setRenderable(view);
-            descriptionPlaneNode.setLocalPosition(new Vector3(0f,0f,0f));
+            descriptionPlaneNode.setLocalRotation(new Quaternion(new Vector3(1,0,0), -90));
+            descriptionPlaneNode.setLocalPosition(new Vector3(0f,-image.getExtentZ(),0f));
             descriptionPlaneNode.setParent(anchorNode);
-            Log.d("IMAGE", "ViewRenderable is ready");
         });
+    }
+
+    private void addInfoButton(AnchorNode anchorNode, AugmentedImage image) {
+        ModelRenderable.builder()
+                .setSource(this,R.raw.infobuttonobj)
+                .build()
+                .thenAccept( infoButton -> {
+                    Node infoButtonNode = new Node();
+                    infoButtonNode.setName("infoButtonNode");
+                    infoButtonNode.setRenderable(infoButton);
+                    infoButtonNode.setWorldScale(new Vector3(0.02f,0.02f,0.02f));
+                    infoButtonNode.setLocalRotation(new Quaternion(new Vector3(1f,0f,0f), -90));
+                    infoButtonNode.setParent(anchorNode);
+                    infoButtonNode.setLocalPosition(new Vector3(0f, image.getExtentZ() / 2, 0f));
+                    infoButtonNode.setOnTapListener((hitTestResult, motionEvent) -> {
+                        Log.d("TAP: ", "infoButtonNode tapped");
+                        addNodeToScene(image, anchorNode);
+                    });
+                })
+                .exceptionally(
+                        throwable -> {
+                            Log.e("RRR", "Unable to load Renderable.", throwable);
+                            return null;
+                        });
     }
 
 
