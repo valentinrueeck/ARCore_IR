@@ -5,6 +5,7 @@ import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.TextView;
 
 import com.google.ar.core.Anchor;
 import com.google.ar.core.AugmentedImage;
@@ -22,6 +23,7 @@ import com.google.ar.sceneform.Node;
 import com.google.ar.sceneform.math.Quaternion;
 import com.google.ar.sceneform.math.Vector3;
 import com.google.ar.sceneform.rendering.ModelRenderable;
+import com.google.ar.sceneform.rendering.ViewRenderable;
 import com.google.ar.sceneform.ux.ArFragment;
 
 import java.io.IOException;
@@ -29,7 +31,9 @@ import java.io.InputStream;
 import java.nio.channels.CancelledKeyException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 public class MainActivity extends AppCompatActivity {
     private Context context;
@@ -73,28 +77,14 @@ public class MainActivity extends AppCompatActivity {
                         }
                     }
                 });
-
     }
 
-
-    private void setUpImageDb() {
-        try {
-            InputStream inputStream = context.getAssets().open("referenceImages.imgdb");
-            augmentedImageDatabase = new AugmentedImageDatabase(arSession);
-            augmentedImageDatabase = AugmentedImageDatabase.deserialize(arSession, inputStream);
-            arConfig.setAugmentedImageDatabase(augmentedImageDatabase);
-            arSession.configure(arConfig);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
 
     private void handleReferenceImages(Collection<AugmentedImage> augmentedImages) {
         outerLoop:
         for (AugmentedImage image : augmentedImages) {
             Log.d("IMAGE", "lastUpdatedImages: " + String.valueOf(lastUpdatedAugmentedImages.size()));
             for( AugmentedImage lastImage : lastUpdatedAugmentedImages){
-                Log.d("IMAGE", "lastUpdatedImages");
                 if( lastImage.getName().equals(image.getName())){
                     Log.d("IMAGE", image.getName() + " was already tracked");
                     break outerLoop;
@@ -116,10 +106,22 @@ public class MainActivity extends AppCompatActivity {
                 highlightPlaneNode.setParent(anchorNode);
                 removeHighlightNode(anchorNode, highlightPlaneNode);
 
+                ViewRenderable descriptionText = ARContentCreator.createDescriptionPlane(image,context);
+                Node descriptionPlaneNode = new Node();
+                descriptionPlaneNode.setName("descriptionPlaneNode");
+                descriptionPlaneNode.setRenderable(descriptionText);
+                descriptionPlaneNode.setParent(anchorNode);
+                descriptionPlaneNode.setLocalPosition(new Vector3(0.1f,0f,-0.1f));
+
+
+                Collection<Node> nodes = arSceneView.getScene().getChildren();
+                Node n = new Node();
+
+
             }
-            lastUpdatedAugmentedImages = augmentedImages;
             Log.d("IMAGE", "Anchors: " + arSession.getAllAnchors().size());
         }
+        lastUpdatedAugmentedImages = augmentedImages;
     }
 
     private void removeHighlightNode(Node highlightNodeParent, Node highlightNode) {
@@ -127,12 +129,9 @@ public class MainActivity extends AppCompatActivity {
                 new java.util.TimerTask() {
                     @Override
                     public void run() {
-                        handler.post(new Runnable() {
-                            @Override
-                            public void run() {
-                                Log.d("TimeOut", "f");
-                                highlightNodeParent.removeChild(highlightNode);
-                            }
+                        handler.post(() -> {
+                            Log.d("TimeOut", "f");
+                            highlightNodeParent.removeChild(highlightNode);
                         });
                     }
                 },
@@ -144,6 +143,33 @@ public class MainActivity extends AppCompatActivity {
         for (Anchor anchor : arSession.getAllAnchors()){
             anchor.detach();
         }
+        lastUpdatedAugmentedImages = Collections.emptyList();
+    }
+
+    private void setUpImageDb() {
+        try {
+            InputStream inputStream = context.getAssets().open("referenceImages.imgdb");
+            augmentedImageDatabase = new AugmentedImageDatabase(arSession);
+            augmentedImageDatabase = AugmentedImageDatabase.deserialize(arSession, inputStream);
+            arConfig.setAugmentedImageDatabase(augmentedImageDatabase);
+            arSession.configure(arConfig);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void addNodeToScene(Anchor anchor, AugmentedImage image){
+        AnchorNode anchorNode = new AnchorNode(anchor);
+        CompletableFuture<ViewRenderable> future = ViewRenderable.builder().setView(context, R.layout.text_view).build();
+        future.thenAccept( view -> {
+            ((TextView) view.getView()).setText(PaintingDescriptionTextRetriever.retrieveDescriptionText(image.getName()));
+            Node descriptionPlaneNode = new Node();
+            descriptionPlaneNode.setName("descriptionPlaneNode");
+            descriptionPlaneNode.setRenderable(view);
+            descriptionPlaneNode.setLocalPosition(new Vector3(0f,0f,0f));
+            descriptionPlaneNode.setParent(anchorNode);
+            Log.d("IMAGE", "ViewRenderable is ready");
+        });
     }
 
 
