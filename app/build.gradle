@@ -45,12 +45,17 @@ dependencies {
 apply plugin: 'com.google.ar.sceneform.plugin'
 
 
-sceneform.asset('sampledata/infobutton.fbx',
-        'default',
-        'sampledata/infobutton.sfa',
-        'src/main/res/raw/infobutton')
-
 sceneform.asset('sampledata/infobuttonobj.obj',
         'default',
         'sampledata/infobuttonobj.sfa',
         'src/main/res/raw/infobuttonobj')
+
+sceneform.asset('sampledata/playbutton.fbx',
+        'default',
+        'sampledata/playbutton.sfa',
+        'src/main/res/raw/playbutton')
+
+sceneform.asset('sampledata/infobutton.fbx',
+        'default',
+        'sampledata/infobutton.sfa',
+        'src/main/res/raw/infobutton')
