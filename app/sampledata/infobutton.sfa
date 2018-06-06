@@ -131,7 +131,7 @@
       ],
       file: "sampledata/infobutton.fbx",
       name: "infobutton",
-      scale: 0.033333000000000002,
+      scale: 0.05,
       suggested_collision: {
          center: {
             x: 0,

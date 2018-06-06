@@ -7,7 +7,6 @@ import android.os.Bundle;
 import android.text.SpannableString;
 import android.text.style.UnderlineSpan;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.widget.TextView;
 
 import com.google.ar.core.Anchor;
@@ -45,6 +44,7 @@ public class MainActivity extends AppCompatActivity {
     private ArSceneView arSceneView;
     private Handler handler = new Handler();
     private Collection<AugmentedImage> lastUpdatedAugmentedImages;
+    private AudioContentController audioContentController;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -152,7 +152,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void addNodeToScene(AugmentedImage image, AnchorNode anchorNode){
+    private void addDescriptionPlane(AnchorNode anchorNode, AugmentedImage image){
         CompletableFuture<ViewRenderable> future = ViewRenderable.builder().setView(context, R.layout.text_view).build();
         future.thenAccept( view -> {
             int height = Math.round(view.getPixelsToMetersRatio() * 0.25f);
@@ -185,13 +185,13 @@ public class MainActivity extends AppCompatActivity {
                     Node infoButtonNode = new Node();
                     infoButtonNode.setName("infoButtonNode");
                     infoButtonNode.setRenderable(infoButton);
-                    infoButtonNode.setWorldScale(new Vector3(0.01f,0.01f,0.01f));
+                    infoButtonNode.setWorldScale(new Vector3(0.005f,0.005f,0.005f));
                     infoButtonNode.setLocalRotation(new Quaternion(new Vector3(1f,0f,0f), -90));
                     infoButtonNode.setParent(anchorNode);
                     infoButtonNode.setLocalPosition(new Vector3(0f, image.getExtentZ() / 2 + infoButtonNode.getWorldScale().x / 2, 0f));
                     infoButtonNode.setOnTapListener((hitTestResult, motionEvent) -> {
                         Log.d("TAP: ", "infoButtonNode tapped");
-                        addNodeToScene(image, anchorNode);
+                        addDescriptionPlane(anchorNode, image);
                     });
                 })
                 .exceptionally(
@@ -213,16 +213,48 @@ public class MainActivity extends AppCompatActivity {
                     playButtonNode.setLocalRotation(new Quaternion(new Vector3(0f,1f,0f), -90));
                     playButtonNode.setParent(anchorNode);
                     playButtonNode.setLocalPosition(new Vector3(image.getExtentX() / 2 + playButtonNode.getWorldScale().x / 2, 0f, 0f));
-//                    playButtonNode.setOnTapListener((hitTestResult, motionEvent) -> {
-//                        Log.d("TAP: ", "playButtonNode tapped");
-//                        addNodeToScene(image, anchorNode);
-//                    });
+                    playButtonNode.setOnTapListener((hitTestResult, motionEvent) -> {
+                        this.audioContentController = new AudioContentController(context, getAudioFileResId(image));
+                        this.audioContentController.playAudio();
+                        anchorNode.removeChild(playButtonNode);
+                        addPauseButtonNode(anchorNode, image);
+                    });
                 })
                 .exceptionally(
                         throwable -> {
                             Log.e("RRR", "Unable to load Renderable.", throwable);
                             return null;
                         });
+    }
+
+    private void addPauseButtonNode(AnchorNode anchorNode, AugmentedImage image){
+        ModelRenderable.builder()
+                .setSource(this,R.raw.pausebutton)
+                .build()
+                .thenAccept( pauseButton -> {
+                    Node pauseButtonNode = new Node();
+                    pauseButtonNode.setName("pauseButtonNode");
+                    pauseButtonNode.setRenderable(pauseButton);
+                    pauseButtonNode.setWorldScale(new Vector3(0.002f,0.002f,0.002f));
+                    pauseButtonNode.setLocalRotation(new Quaternion(new Vector3(0f,1f,0f), -90));
+                    pauseButtonNode.setParent(anchorNode);
+                    pauseButtonNode.setLocalPosition(new Vector3(image.getExtentX() / 2 + pauseButtonNode.getWorldScale().x / 2, 0f, 0f));
+                    pauseButtonNode.setOnTapListener((hitTestResult, motionEvent) -> {
+                        this.audioContentController.stopAudio();
+                        anchorNode.removeChild(pauseButtonNode);
+                        addPlayButton(anchorNode, image);
+
+                    });
+                })
+                .exceptionally(
+                        throwable -> {
+                            Log.e("RRR", "Unable to load Renderable.", throwable);
+                            return null;
+                        });
+    }
+
+    private int getAudioFileResId(AugmentedImage image){
+        return getResources().getIdentifier(image.getName().toLowerCase() + "_audio", "raw", getPackageName());
     }
 
 

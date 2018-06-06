@@ -59,3 +59,8 @@ sceneform.asset('sampledata/infobutton.fbx',
         'default',
         'sampledata/infobutton.sfa',
         'src/main/res/raw/infobutton')
+
+sceneform.asset('sampledata/pausebutton.fbx',
+        'default',
+        'sampledata/pausebutton.sfa',
+        'src/main/res/raw/pausebutton')
