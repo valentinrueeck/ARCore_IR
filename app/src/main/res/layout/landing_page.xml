@@ -50,9 +50,10 @@
         android:id="@+id/button"
         android:layout_width="106dp"
         android:layout_height="wrap_content"
-        android:layout_alignEnd="@+id/textView5"
         android:layout_alignParentBottom="true"
-        android:layout_marginBottom="11dp"
+        android:layout_alignParentEnd="true"
+        android:layout_marginBottom="12dp"
+        android:layout_marginEnd="11dp"
         android:background="@drawable/round_corners_button"
         android:onClick="onButtonClick"
         android:text="Los Geht's" />
