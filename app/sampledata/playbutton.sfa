@@ -1,0 +1,150 @@
+{
+   materials: [
+      {
+         name: "Blue",
+         parameters: [
+            {
+               baseColor: [
+                  0,
+                  1,
+                  0.010692,
+                  1,
+               ],
+            },
+            {
+               baseColorMap: null,
+            },
+            {
+               normalMap: null,
+            },
+            {
+               interpolatedColor: null,
+            },
+            {
+               metallic: 0,
+            },
+            {
+               metallicMap: null,
+            },
+            {
+               roughness: 1,
+            },
+            {
+               roughnessMap: null,
+            },
+            {
+               reflectance: 0.5,
+            },
+            {
+               opacity: null,
+            },
+         ],
+         source: "build/sceneform_sdk/default_materials/fbx_material.sfm",
+      },
+      {
+         name: "Black.001",
+         parameters: [
+            {
+               baseColor: [
+                  1,
+                  1,
+                  1,
+                  1,
+               ],
+            },
+            {
+               baseColorMap: null,
+            },
+            {
+               normalMap: null,
+            },
+            {
+               interpolatedColor: null,
+            },
+            {
+               metallic: 0,
+            },
+            {
+               metallicMap: null,
+            },
+            {
+               roughness: 1,
+            },
+            {
+               roughnessMap: null,
+            },
+            {
+               reflectance: 0.5,
+            },
+            {
+               opacity: null,
+            },
+         ],
+         source: "build/sceneform_sdk/default_materials/fbx_material.sfm",
+      },
+      {
+         name: "Black",
+         parameters: [
+            {
+               baseColor: [
+                  1,
+                  1,
+                  1,
+                  1,
+               ],
+            },
+            {
+               baseColorMap: null,
+            },
+            {
+               normalMap: null,
+            },
+            {
+               interpolatedColor: null,
+            },
+            {
+               metallic: 0,
+            },
+            {
+               metallicMap: null,
+            },
+            {
+               roughness: 1,
+            },
+            {
+               roughnessMap: null,
+            },
+            {
+               reflectance: 0.5,
+            },
+            {
+               opacity: null,
+            },
+         ],
+         source: "build/sceneform_sdk/default_materials/fbx_material.sfm",
+      },
+   ],
+   model: {
+      attributes: [
+         "Position",
+         "Orientation",
+      ],
+      file: "sampledata/playbutton.fbx",
+      name: "playbutton",
+      scale: 0.125,
+      suggested_collision: {
+         center: {
+            x: 0,
+            y: 0,
+            z: 0,
+         },
+         size: {
+            x: 1,
+            y: 1,
+            z: 1,
+         },
+         type: "Box",
+      },
+   },
+   version: "0.51:1",
+}

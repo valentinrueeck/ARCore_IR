@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">ARCore_IR</string>
+    <string name="background_image">Backgound Image</string>
+    <string name="start_button">Los geht's!</string>
+    <string name="welcome_text">\nWilkommen im Museum of Art!\nUm die App zu nutzen halten Sie die Kamera auf die verschiedenen Bilder in unserem Museum. Dabei werden klickbare Elemente in das Kamerabild eingefügt, wodurch Sie Informationen sowie einen Audioguide zu den jeweiligen Gemälden erhalten.</string>
+    <string name="museum_of_art">Museum of Art</string>
 </resources>
