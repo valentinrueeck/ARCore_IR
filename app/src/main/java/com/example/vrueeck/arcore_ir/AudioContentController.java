@@ -11,7 +11,6 @@ public class AudioContentController {
 
     private MediaPlayer mediaPlayer;
 
-
     AudioContentController(){}
 
     public MediaPlayer getMediaPlayer() {

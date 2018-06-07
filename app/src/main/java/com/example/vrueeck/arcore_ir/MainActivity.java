@@ -27,11 +27,14 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class MainActivity extends AppCompatActivity {
     public static final String LOG_TAG = "MainActivity";
     public static final String IMAGE_DB_NAME = "referenceImages.imgdb";
     private Context context;
+    private ArFragment arFragment;
     private Session arSession;
     private Config arConfig;
     private ArSceneView arSceneView;
@@ -42,7 +45,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         context = getApplicationContext();
-        ArFragment arFragment = (ArFragment) getSupportFragmentManager().findFragmentById(R.id.ux_fragment);
+        arFragment = (ArFragment) getSupportFragmentManager().findFragmentById(R.id.ux_fragment);
         arSceneView = arFragment.getArSceneView();
         arFragment.getPlaneDiscoveryController().hide();
         arFragment.getPlaneDiscoveryController().setInstructionView(null);
@@ -94,7 +97,7 @@ public class MainActivity extends AppCompatActivity {
                 anchorNode.setParent(arSceneView.getScene());
 
                 ARContentCreator.addHighlightImagePlane(context, anchorNode, image);
-                ARContentCreator.addInfoButton(context, anchorNode, image);
+                ARContentCreator.addInfoButton(context, anchorNode, image, arFragment);
                 ARContentCreator.addPlayButton(context, anchorNode, image);
             }
             Log.d(LOG_TAG, "Anchors: " + arSession.getAllAnchors().size());
@@ -103,8 +106,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public static void removeHighlightNode(Node highlightNodeParent, Node highlightNode) {
-        new java.util.Timer().schedule(
-                new java.util.TimerTask() {
+        new Timer().schedule(
+                new TimerTask() {
                     @Override
                     public void run() {
                         new Handler(Looper.getMainLooper()).post(() -> {
@@ -126,9 +129,7 @@ public class MainActivity extends AppCompatActivity {
     private void setUpImageDb() {
         try {
             InputStream inputStream = context.getAssets().open(IMAGE_DB_NAME);
-            AugmentedImageDatabase augmentedImageDatabase = new AugmentedImageDatabase(arSession);
-            augmentedImageDatabase = AugmentedImageDatabase.deserialize(arSession, inputStream);
-            arConfig.setAugmentedImageDatabase(augmentedImageDatabase);
+            arConfig.setAugmentedImageDatabase(AugmentedImageDatabase.deserialize(arSession, inputStream));
             arSession.configure(arConfig);
         } catch (IOException e) {
             e.printStackTrace();

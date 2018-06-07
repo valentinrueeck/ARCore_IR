@@ -1,5 +1,6 @@
 package com.example.vrueeck.arcore_ir;
 
+import android.app.Activity;
 import android.content.Context;
 
 import android.text.SpannableString;
@@ -17,6 +18,8 @@ import com.google.ar.sceneform.rendering.MaterialFactory;
 import com.google.ar.sceneform.rendering.ModelRenderable;
 import com.google.ar.sceneform.rendering.ShapeFactory;
 import com.google.ar.sceneform.rendering.ViewRenderable;
+import com.google.ar.sceneform.ux.ArFragment;
+import com.google.ar.sceneform.ux.TransformableNode;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -30,7 +33,6 @@ public class ARContentCreator {
     public static final String PAUSE_BUTTON_NODE_NAME = "pauseButtonNode";
 
     private static  AudioContentController audioContentController = new AudioContentController();
-
 
     public static void addHighlightImagePlane(Context context, AnchorNode anchorNode, AugmentedImage image) {
         Vector3 size = new Vector3(image.getExtentX(),image.getExtentZ(), -0.01f);
@@ -50,7 +52,7 @@ public class ARContentCreator {
                         });
     }
 
-    private static void addDescriptionPlane(Context context, AnchorNode anchorNode, AugmentedImage image){
+    private static void addDescriptionPlane(Context context, AnchorNode anchorNode, AugmentedImage image, ArFragment arFragment){
         CompletableFuture<ViewRenderable> future = ViewRenderable.builder().setView(context, R.layout.text_view).build();
         future.thenAccept( view -> {
             int height = Math.round(view.getPixelsToMetersRatio() * 0.25f);
@@ -66,7 +68,8 @@ public class ARContentCreator {
             descriptionText.setWidth(width);
             descriptionText.setHeight(height);
 
-            Node descriptionPlaneNode = new Node();
+            TransformableNode descriptionPlaneNode = new TransformableNode(arFragment.getTransformationSystem());
+            descriptionPlaneNode.getScaleController().setEnabled(true);
             descriptionPlaneNode.setName(DESCRIPTION_PLANE_NODE_NAME);
             descriptionPlaneNode.setRenderable(view);
             descriptionPlaneNode.setParent(anchorNode);
@@ -75,7 +78,7 @@ public class ARContentCreator {
         });
     }
 
-    public static void addInfoButton(Context context,AnchorNode anchorNode, AugmentedImage image) {
+    public static void addInfoButton(Context context,AnchorNode anchorNode, AugmentedImage image, ArFragment arFragment) {
         ModelRenderable.builder()
                 .setSource(context, R.raw.infobutton)
                 .build()
@@ -89,7 +92,7 @@ public class ARContentCreator {
                     infoButtonNode.setLocalPosition(new Vector3(0f,0f, -image.getExtentZ() / 2 - infoButtonNode.getWorldScale().x / 2));
                     infoButtonNode.setOnTapListener((hitTestResult, motionEvent) -> {
                         Log.d(LOG_TAG, "infoButtonNode tapped");
-                        ARContentCreator.addDescriptionPlane(context, anchorNode, image);
+                        ARContentCreator.addDescriptionPlane(context, anchorNode, image, arFragment);
                     });
                 })
                 .exceptionally(
