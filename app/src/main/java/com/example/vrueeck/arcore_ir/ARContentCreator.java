@@ -1,7 +1,7 @@
 package com.example.vrueeck.arcore_ir;
 
 import android.content.Context;
-import android.graphics.ColorSpace;
+
 import android.text.SpannableString;
 import android.text.style.UnderlineSpan;
 import android.util.Log;
@@ -18,12 +18,17 @@ import com.google.ar.sceneform.rendering.ModelRenderable;
 import com.google.ar.sceneform.rendering.ShapeFactory;
 import com.google.ar.sceneform.rendering.ViewRenderable;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 public class ARContentCreator {
+    public static final String LOG_TAG = "ARContenCreator";
+    public static final String HIGHLIGHT_PLANE_NODE_NAME = "highlightPlaneNode";
+    public static final String DESCRIPTION_PLANE_NODE_NAME = "descriptionPlaneNode";
+    public static final String INFO_BUTTON_NODE_NAME = "infoButtonNode";
+    public static final String PLAY_BUTTON_NODE_NAME = "playButtonNode";
+    public static final String PAUSE_BUTTON_NODE_NAME = "pauseButtonNode";
     private static AudioContentController audioContentController;
+
 
     public static void addHighlightImagePlane(Context context, AnchorNode anchorNode, AugmentedImage image) {
         Vector3 size = new Vector3(image.getExtentX(),image.getExtentZ(), -0.01f);
@@ -35,7 +40,7 @@ public class ARContentCreator {
                         material -> {
                             ModelRenderable highlightPlane = ShapeFactory.makeCube(size, center, material);
                             Node highlightPlaneNode = new Node();
-                            highlightPlaneNode.setName("highlightPlaneNode");
+                            highlightPlaneNode.setName(HIGHLIGHT_PLANE_NODE_NAME);
                             highlightPlaneNode.setRenderable(highlightPlane);
                             highlightPlaneNode.setLocalRotation(new Quaternion(new Vector3(1,0,0), 90));
                             highlightPlaneNode.setParent(anchorNode);
@@ -60,7 +65,7 @@ public class ARContentCreator {
             descriptionText.setHeight(height);
 
             Node descriptionPlaneNode = new Node();
-            descriptionPlaneNode.setName("descriptionPlaneNode");
+            descriptionPlaneNode.setName(DESCRIPTION_PLANE_NODE_NAME);
             descriptionPlaneNode.setRenderable(view);
             descriptionPlaneNode.setParent(anchorNode);
             descriptionPlaneNode.setLocalPosition(new Vector3(0f,0f, image.getExtentZ() + descriptionText.getHeight() + 0.3f));
@@ -74,20 +79,20 @@ public class ARContentCreator {
                 .build()
                 .thenAccept( infoButton -> {
                     Node infoButtonNode = new Node();
-                    infoButtonNode.setName("infoButtonNode");
+                    infoButtonNode.setName(INFO_BUTTON_NODE_NAME);
                     infoButtonNode.setRenderable(infoButton);
                     infoButtonNode.setWorldScale(new Vector3(0.005f,0.005f,0.005f));
                     infoButtonNode.setLocalRotation(new Quaternion(new Vector3(1f,0f,0f), -90));
                     infoButtonNode.setParent(anchorNode);
                     infoButtonNode.setLocalPosition(new Vector3(0f,0f, -image.getExtentZ() / 2 - infoButtonNode.getWorldScale().x / 2));
                     infoButtonNode.setOnTapListener((hitTestResult, motionEvent) -> {
-                        Log.d("TAP: ", "infoButtonNode tapped");
+                        Log.d(LOG_TAG, "infoButtonNode tapped");
                         ARContentCreator.addDescriptionPlane(context, anchorNode, image);
                     });
                 })
                 .exceptionally(
                         throwable -> {
-                            Log.e("RRR", "Unable to load Renderable.", throwable);
+                            Log.e(LOG_TAG, "Unable to load Renderable.", throwable);
                             return null;
                         });
     }
@@ -98,7 +103,7 @@ public class ARContentCreator {
                 .build()
                 .thenAccept( playButton -> {
                     Node playButtonNode = new Node();
-                    playButtonNode.setName("playButtonNode");
+                    playButtonNode.setName(PLAY_BUTTON_NODE_NAME);
                     playButtonNode.setRenderable(playButton);
                     playButtonNode.setWorldScale(new Vector3(0.002f,0.002f,0.002f));
                     playButtonNode.setLocalRotation(new Quaternion(new Vector3(0f,1f,0f), -90));
@@ -114,18 +119,18 @@ public class ARContentCreator {
                 })
                 .exceptionally(
                         throwable -> {
-                            Log.e("RRR", "Unable to load Renderable.", throwable);
+                            Log.e(LOG_TAG, "Unable to load Renderable.", throwable);
                             return null;
                         });
     }
 
-    public static void addPauseButtonNode(Context context, AnchorNode anchorNode, AugmentedImage image){
+    private static void addPauseButtonNode(Context context, AnchorNode anchorNode, AugmentedImage image){
         ModelRenderable.builder()
                 .setSource(context, R.raw.pausebutton)
                 .build()
                 .thenAccept( pauseButton -> {
                     Node pauseButtonNode = new Node();
-                    pauseButtonNode.setName("pauseButtonNode");
+                    pauseButtonNode.setName(PAUSE_BUTTON_NODE_NAME);
                     pauseButtonNode.setRenderable(pauseButton);
                     pauseButtonNode.setWorldScale(new Vector3(0.002f,0.002f,0.002f));
                     pauseButtonNode.setLocalRotation(new Quaternion(new Vector3(0f,1f,0f), -90));
@@ -140,7 +145,7 @@ public class ARContentCreator {
                 })
                 .exceptionally(
                         throwable -> {
-                            Log.e("RRR", "Unable to load Renderable.", throwable);
+                            Log.e(LOG_TAG, "Unable to load Renderable.", throwable);
                             return null;
                         });
     }
