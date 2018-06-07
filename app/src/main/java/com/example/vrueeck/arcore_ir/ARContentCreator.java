@@ -33,23 +33,4 @@ public class ARContentCreator {
         return modelRenderableHashMap.get("highlightPlane");
     }
 
-    public static ViewRenderable createDescriptionPlane(AugmentedImage image, Context context){
-        final ViewRenderable[] textView = {null};
-
-        CompletableFuture<ViewRenderable> future = ViewRenderable.builder().setView(context, R.layout.text_view).build();
-        future.thenAccept( view -> {
-            textView[0] = view;
-//            ((TextView) textView[0].getView()).setText(PaintingDescriptionTextRetriever.retrieveDescriptionText(image.getName()));
-//            ((TextView)textView[0].getView().findViewById(R.id.textView)).setText(PaintingDescriptionTextRetriever.retrieveDescriptionText(image.getName()));
-            Log.d("IMAGE", "ViewRenderable is ready");
-        });
-
-        return textView[0];
-    }
-
-    private static TextView createTextView(AugmentedImage image, Context context){
-        TextView textView = new TextView(context);
-        textView.setText(PaintingDescriptionTextRetriever.retrieveDescriptionText(image.getName()));
-        return textView;
-     }
 }

@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">ARCore_IR</string>
+    <string name="background_image">Backgound Image</string>
 </resources>

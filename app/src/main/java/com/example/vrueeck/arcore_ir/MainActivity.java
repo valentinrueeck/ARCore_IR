@@ -1,6 +1,7 @@
 package com.example.vrueeck.arcore_ir;
 
 import android.content.Context;
+import android.media.MediaPlayer;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -124,7 +125,6 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void run() {
                         handler.post(() -> {
-                            Log.d("TimeOut", "f");
                             highlightNodeParent.removeChild(highlightNode);
                         });
                     }
@@ -172,7 +172,7 @@ public class MainActivity extends AppCompatActivity {
             descriptionPlaneNode.setName("descriptionPlaneNode");
             descriptionPlaneNode.setRenderable(view);
             descriptionPlaneNode.setParent(anchorNode);
-            descriptionPlaneNode.setLocalPosition(new Vector3(0f,-image.getExtentZ() - 1f ,0f));
+            descriptionPlaneNode.setLocalPosition(new Vector3(0f,0f, image.getExtentZ() + descriptionText.getHeight() + 0.3f));
             descriptionPlaneNode.setLocalRotation(new Quaternion(new Vector3(1,0,0), -90));
         });
     }
@@ -188,7 +188,7 @@ public class MainActivity extends AppCompatActivity {
                     infoButtonNode.setWorldScale(new Vector3(0.005f,0.005f,0.005f));
                     infoButtonNode.setLocalRotation(new Quaternion(new Vector3(1f,0f,0f), -90));
                     infoButtonNode.setParent(anchorNode);
-                    infoButtonNode.setLocalPosition(new Vector3(0f, image.getExtentZ() / 2 + infoButtonNode.getWorldScale().x / 2, 0f));
+                    infoButtonNode.setLocalPosition(new Vector3(0f,0f, -image.getExtentZ() / 2 - infoButtonNode.getWorldScale().x / 2));
                     infoButtonNode.setOnTapListener((hitTestResult, motionEvent) -> {
                         Log.d("TAP: ", "infoButtonNode tapped");
                         addDescriptionPlane(anchorNode, image);
@@ -212,10 +212,11 @@ public class MainActivity extends AppCompatActivity {
                     playButtonNode.setWorldScale(new Vector3(0.002f,0.002f,0.002f));
                     playButtonNode.setLocalRotation(new Quaternion(new Vector3(0f,1f,0f), -90));
                     playButtonNode.setParent(anchorNode);
-                    playButtonNode.setLocalPosition(new Vector3(image.getExtentX() / 2 + playButtonNode.getWorldScale().x / 2, 0f, 0f));
+                    playButtonNode.setLocalPosition(new Vector3(image.getExtentX() / 2 + playButtonNode.getWorldScale().x, 0f, 0f));
                     playButtonNode.setOnTapListener((hitTestResult, motionEvent) -> {
-                        this.audioContentController = new AudioContentController(context, getAudioFileResId(image));
+                        this.audioContentController = new AudioContentController(context, getAudioFileResId(image.getName().toLowerCase()));
                         this.audioContentController.playAudio();
+                        this.audioContentController.getMediaPlayer().setOnCompletionListener(mp -> addPlayButton(anchorNode,image));
                         anchorNode.removeChild(playButtonNode);
                         addPauseButtonNode(anchorNode, image);
                     });
@@ -253,10 +254,8 @@ public class MainActivity extends AppCompatActivity {
                         });
     }
 
-    private int getAudioFileResId(AugmentedImage image){
-        return getResources().getIdentifier(image.getName().toLowerCase() + "_audio", "raw", getPackageName());
+    private int getAudioFileResId(String imageName){
+        return getResources().getIdentifier(imageName + "_audio", "raw", getPackageName());
     }
-
-
 
 }
