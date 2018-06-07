@@ -21,13 +21,15 @@ import com.google.ar.sceneform.rendering.ViewRenderable;
 import java.util.concurrent.CompletableFuture;
 
 public class ARContentCreator {
+
     public static final String LOG_TAG = "ARContenCreator";
     public static final String HIGHLIGHT_PLANE_NODE_NAME = "highlightPlaneNode";
     public static final String DESCRIPTION_PLANE_NODE_NAME = "descriptionPlaneNode";
     public static final String INFO_BUTTON_NODE_NAME = "infoButtonNode";
     public static final String PLAY_BUTTON_NODE_NAME = "playButtonNode";
     public static final String PAUSE_BUTTON_NODE_NAME = "pauseButtonNode";
-    private static AudioContentController audioContentController;
+
+    private static  AudioContentController audioContentController = new AudioContentController();
 
 
     public static void addHighlightImagePlane(Context context, AnchorNode anchorNode, AugmentedImage image) {
@@ -48,7 +50,7 @@ public class ARContentCreator {
                         });
     }
 
-    public static void addDescriptionPlane(Context context, AnchorNode anchorNode, AugmentedImage image){
+    private static void addDescriptionPlane(Context context, AnchorNode anchorNode, AugmentedImage image){
         CompletableFuture<ViewRenderable> future = ViewRenderable.builder().setView(context, R.layout.text_view).build();
         future.thenAccept( view -> {
             int height = Math.round(view.getPixelsToMetersRatio() * 0.25f);
@@ -68,7 +70,7 @@ public class ARContentCreator {
             descriptionPlaneNode.setName(DESCRIPTION_PLANE_NODE_NAME);
             descriptionPlaneNode.setRenderable(view);
             descriptionPlaneNode.setParent(anchorNode);
-            descriptionPlaneNode.setLocalPosition(new Vector3(0f,0f, image.getExtentZ() + descriptionText.getHeight() + 0.3f));
+            descriptionPlaneNode.setLocalPosition(new Vector3(0f,0f, image.getExtentZ() + descriptionText.getHeight() + 0.15f));
             descriptionPlaneNode.setLocalRotation(new Quaternion(new Vector3(1,0,0), -90));
         });
     }
@@ -110,11 +112,14 @@ public class ARContentCreator {
                     playButtonNode.setParent(anchorNode);
                     playButtonNode.setLocalPosition(new Vector3(image.getExtentX() / 2 + playButtonNode.getWorldScale().x, 0f, 0f));
                     playButtonNode.setOnTapListener((hitTestResult, motionEvent) -> {
-                        audioContentController = new AudioContentController(context, getAudioFileResId(context, image.getName().toLowerCase()));
-                        audioContentController.playAudio();
-                        audioContentController.getMediaPlayer().setOnCompletionListener(mp -> addPlayButton(context, anchorNode,image));
-                        anchorNode.removeChild(playButtonNode);
-                        ARContentCreator.addPauseButtonNode(context, anchorNode, image);
+                        if(!audioContentController.isAudioPlaying()) {
+                            audioContentController.setUpAudio(context, getAudioFileResId(context, image.getName().toLowerCase()));
+                            audioContentController.playAudio();
+                            audioContentController.getMediaPlayer().setOnCompletionListener(mp -> addPlayButton(context, anchorNode,image));
+                            anchorNode.removeChild(playButtonNode);
+                            ARContentCreator.addPauseButtonNode(context, anchorNode, image);
+                        }
+
                     });
                 })
                 .exceptionally(

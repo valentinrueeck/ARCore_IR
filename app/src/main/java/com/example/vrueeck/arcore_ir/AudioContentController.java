@@ -10,19 +10,19 @@ import com.google.ar.sceneform.Node;
 public class AudioContentController {
 
     private MediaPlayer mediaPlayer;
-    private Node playButtonNode;
-    private Node pauseButtonNode;
 
-    public AudioContentController(Context context, int resId){
-        this.mediaPlayer = MediaPlayer.create(context, resId);
-    }
+
+    AudioContentController(){}
 
     public MediaPlayer getMediaPlayer() {
-        return mediaPlayer;
+        if (this.mediaPlayer != null) {
+            return mediaPlayer;
+        }
+        return null;
     }
 
-    public void setMediaPlayer(MediaPlayer mediaPlayer) {
-        this.mediaPlayer = mediaPlayer;
+    public void setUpAudio(Context context, int resId){
+        this.mediaPlayer = MediaPlayer.create(context, resId);
     }
 
     public void playAudio() {
@@ -31,6 +31,10 @@ public class AudioContentController {
 
     public void stopAudio() {
         this.mediaPlayer.stop();
+    }
+
+    public boolean isAudioPlaying(){
+        return this.mediaPlayer.isPlaying();
     }
 
 }
