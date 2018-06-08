@@ -1,8 +1,9 @@
 package com.example.vrueeck.arcore_ir;
 
-import android.app.Activity;
 import android.content.Context;
 
+import android.os.Handler;
+import android.os.Looper;
 import android.text.SpannableString;
 import android.text.style.UnderlineSpan;
 import android.util.Log;
@@ -21,6 +22,8 @@ import com.google.ar.sceneform.rendering.ViewRenderable;
 import com.google.ar.sceneform.ux.ArFragment;
 import com.google.ar.sceneform.ux.TransformableNode;
 
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.CompletableFuture;
 
 public class ARContentCreator {
@@ -42,13 +45,14 @@ public class ARContentCreator {
         MaterialFactory.makeTransparentWithColor(context,new Color(1,1,1,0.5f))
                 .thenAccept(
                         material -> {
+                            audioContentController.stopAudio();
                             ModelRenderable highlightPlane = ShapeFactory.makeCube(size, center, material);
                             Node highlightPlaneNode = new Node();
                             highlightPlaneNode.setName(HIGHLIGHT_PLANE_NODE_NAME);
                             highlightPlaneNode.setRenderable(highlightPlane);
                             highlightPlaneNode.setLocalRotation(new Quaternion(new Vector3(1,0,0), 90));
                             highlightPlaneNode.setParent(anchorNode);
-                            MainActivity.removeHighlightNode(anchorNode, highlightPlaneNode);
+                            removeHighlightNode(anchorNode, highlightPlaneNode);
                         });
     }
 
@@ -113,10 +117,10 @@ public class ARContentCreator {
                     playButtonNode.setWorldScale(new Vector3(0.002f,0.002f,0.002f));
                     playButtonNode.setLocalRotation(new Quaternion(new Vector3(0f,1f,0f), -90));
                     playButtonNode.setParent(anchorNode);
-                    playButtonNode.setLocalPosition(new Vector3(image.getExtentX() / 2 + playButtonNode.getWorldScale().x, 0f, 0f));
+                    playButtonNode.setLocalPosition(new Vector3(image.getExtentX() / 2 + playButtonNode.getWorldScale().x + 0.03f, 0f, 0f));
                     playButtonNode.setOnTapListener((hitTestResult, motionEvent) -> {
                         if(!audioContentController.isAudioPlaying()) {
-                            audioContentController.setUpAudio(context, getAudioFileResId(context, image.getName().toLowerCase()));
+                            audioContentController.setUpMediaPlayer(context, getAudioFileResId(context, image.getName().toLowerCase()));
                             audioContentController.playAudio();
                             audioContentController.getMediaPlayer().setOnCompletionListener(mp -> addPlayButton(context, anchorNode,image));
                             anchorNode.removeChild(playButtonNode);
@@ -143,12 +147,11 @@ public class ARContentCreator {
                     pauseButtonNode.setWorldScale(new Vector3(0.002f,0.002f,0.002f));
                     pauseButtonNode.setLocalRotation(new Quaternion(new Vector3(0f,1f,0f), -90));
                     pauseButtonNode.setParent(anchorNode);
-                    pauseButtonNode.setLocalPosition(new Vector3(image.getExtentX() / 2 + pauseButtonNode.getWorldScale().x / 2, 0f, 0f));
+                    pauseButtonNode.setLocalPosition(new Vector3(image.getExtentX() / 2 + pauseButtonNode.getWorldScale().x + 0.03f, 0f, 0f));
                     pauseButtonNode.setOnTapListener((hitTestResult, motionEvent) -> {
                         audioContentController.stopAudio();
                         anchorNode.removeChild(pauseButtonNode);
                         ARContentCreator.addPlayButton(context, anchorNode, image);
-
                     });
                 })
                 .exceptionally(
@@ -160,6 +163,20 @@ public class ARContentCreator {
 
     private static int getAudioFileResId(Context context, String imageName){
         return context.getResources().getIdentifier(imageName + "_audio", "raw", context.getPackageName());
+    }
+
+    public static void removeHighlightNode(Node highlightNodeParent, Node highlightNode) {
+        new Timer().schedule(
+                new TimerTask() {
+                    @Override
+                    public void run() {
+                        new Handler(Looper.getMainLooper()).post(() -> {
+                            highlightNodeParent.removeChild(highlightNode);
+                        });
+                    }
+                },
+                500
+        );
     }
 
 }

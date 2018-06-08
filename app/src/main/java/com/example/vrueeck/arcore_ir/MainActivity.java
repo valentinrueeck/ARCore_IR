@@ -46,9 +46,9 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         context = getApplicationContext();
         arFragment = (ArFragment) getSupportFragmentManager().findFragmentById(R.id.ux_fragment);
-        arSceneView = arFragment.getArSceneView();
         arFragment.getPlaneDiscoveryController().hide();
         arFragment.getPlaneDiscoveryController().setInstructionView(null);
+        arSceneView = arFragment.getArSceneView();
         try {
             arSession = new Session(context);
         } catch (UnavailableArcoreNotInstalledException | UnavailableApkTooOldException | UnavailableSdkTooOldException e) {
@@ -105,19 +105,7 @@ public class MainActivity extends AppCompatActivity {
         lastUpdatedAugmentedImages = augmentedImages;
     }
 
-    public static void removeHighlightNode(Node highlightNodeParent, Node highlightNode) {
-        new Timer().schedule(
-                new TimerTask() {
-                    @Override
-                    public void run() {
-                        new Handler(Looper.getMainLooper()).post(() -> {
-                            highlightNodeParent.removeChild(highlightNode);
-                        });
-                    }
-                },
-                500
-        );
-    }
+
 
     private void removeExistingAnchors(){
         for (Anchor anchor : arSession.getAllAnchors()){
